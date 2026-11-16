@@ -1,0 +1,12 @@
+Photo Quest
+Copyright 2026 Samuel (github.com/samyipsh)
+
+This app was first built for a church outing and published at
+https://github.com/samyipsh/photo-scavenger-hunt
+
+If you share a copy or a changed version, keep this NOTICE file with it and
+say in your README that it is based on Photo Quest, with the link above.
+
+Third-party parts, each under its own MIT licence:
+- app/components/ui: shadcn-vue components, Copyright (c) 2023 unovue (licenses/shadcn-vue.md)
+- .claude/skills/council: adapted from tstack's council skill, Copyright (c) 2026 Theo Browne (licenses/tstack.md)

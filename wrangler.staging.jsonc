@@ -1,0 +1,33 @@
+// Staging: the same app with its own Worker, database and photo bucket, for testing without
+// touching the live event. Used with -c, never picked up by default:
+//   pnpm run deploy:staging, pnpm db:migrate:staging, pnpm db:seed:staging
+// Secrets are set once with: pnpm wrangler secret put NAME -c wrangler.staging.jsonc
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "photo-quest-staging",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "photo-quest-staging",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "server/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "photo-quest-photos-staging"
+    }
+  ],
+  "vars": {
+    "R2_S3_ENDPOINT": "https://<account-id>.r2.cloudflarestorage.com",
+    "R2_BUCKET_NAME": "photo-quest-photos-staging",
+    "PHOTO_LINK_HOURS": "24",
+    "PHOTO_LINK_CACHE": "5000"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

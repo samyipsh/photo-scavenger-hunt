@@ -1,0 +1,46 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "photo-quest",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    // Unknown paths fall back to index.html so the single-page app handles them.
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/img/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "photo-quest",
+      // From `wrangler d1 create photo-quest --location=<region nearest your venue>`.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "server/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "photo-quest-photos"
+    }
+  ],
+  // Signed upload links and copies go through R2's S3 endpoint (server/utils/storage.ts). The
+  // keys are Worker secrets: R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY, scoped to this bucket.
+  "vars": {
+    // Your Cloudflare account ID goes in the address.
+    "R2_S3_ENDPOINT": "https://<account-id>.r2.cloudflarestorage.com",
+    "R2_BUCKET_NAME": "photo-quest-photos",
+    // Signed view links (server/utils/storage.ts usePhotoLinks): each the same for
+    // PHOTO_LINK_HOURS and valid for twice that, with up to PHOTO_LINK_CACHE signed links
+    // remembered per Worker instance (0 turns that off).
+    "PHOTO_LINK_HOURS": "24",
+    "PHOTO_LINK_CACHE": "5000"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Cloudflare may run the Worker near what it waits on rather than near the phone: every API
+  // request reads D1, and D1 lives in one place (README, "Using it for your own event").
+  "placement": {
+    "mode": "smart"
+  }
+}

@@ -1,0 +1,44 @@
+// A template for deploying your own copy. Copy it to wrangler.jsonc and fill in the
+// placeholders: create the database with `wrangler d1 create`, the bucket with
+// `wrangler r2 bucket create`, and an R2 API token for that bucket. "Running it" in
+// docs/architecture.md has the full steps.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "photo-quest",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/img/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "photo-quest",
+      "database_id": "<your D1 database ID>",
+      "migrations_dir": "server/db/migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "PHOTOS",
+      "bucket_name": "<your bucket name>"
+    }
+  ],
+  // Secrets, set with `wrangler secret put`: NUXT_COMMITTEE_PASSPHRASE, NUXT_APP_SECRET,
+  // R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY.
+  "vars": {
+    "R2_S3_ENDPOINT": "https://<your account ID>.r2.cloudflarestorage.com",
+    "R2_BUCKET_NAME": "<your bucket name>",
+    "PHOTO_LINK_HOURS": "24",
+    "PHOTO_LINK_CACHE": "5000"
+  },
+  "observability": {
+    "enabled": true
+  },
+  // Cloudflare may run the Worker near what it waits on rather than near the phone: every API
+  // request reads D1, and D1 lives in one place (README, "Using it for your own event").
+  "placement": {
+    "mode": "smart"
+  }
+}

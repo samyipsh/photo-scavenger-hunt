@@ -1,0 +1,33 @@
+# Recce photos are personal photos of people, so they stay out of git
+recce photos/
+*.zip
+
+# OS
+.DS_Store
+
+# App
+node_modules/
+.nuxt/
+.output/
+.data/
+dist/
+.env
+.env.*
+!.env.example
+*.db
+*.db-journal
+*.sqlite
+.nitro/
+.cache/
+.wrangler/
+logs/
+*.log
+.dev.vars
+coverage/
+data/tokens.local.json
+docs/ux/round-*/
+# Load-test output: fixtures, screenshots and logs
+tests/e2e/artifacts/
+# An earlier load-test run's scripts, for the old upload protocol; scripts/api-check.ts replaces them
+tests/e2e/
+.claude/worktrees/

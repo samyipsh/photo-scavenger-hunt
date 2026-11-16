@@ -1,0 +1,24 @@
+# Typecheck, unit tests, a production build, and the API check against a local dev server, on every push. The recce
+# photos aren't in the repo, so the scripts draw stand-in photos.
+name: Check
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Local settings
+        run: |
+          echo "NUXT_COMMITTEE_PASSPHRASE=ci-passphrase-$(openssl rand -hex 8)" > .env
+          echo "NUXT_APP_SECRET=$(openssl rand -hex 32)" >> .env
+      - run: pnpm exec playwright install --with-deps chromium
+      # The same command an agent runs locally: verify, build, fresh database, API check.
+      - run: pnpm check:all

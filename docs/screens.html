@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Quest screens</title>
+<meta name="description" content="Every screen of Photo Quest, a phone web app for a group outing's photo challenges.">
+<style>
+:root {
+  color-scheme: light dark;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --grid: #e1e0d9;
+  --accent: #1d7a4f;
+  --on-accent: #ffffff;
+  --link: #1c5cab;
+  --shadow: 0 1px 2px rgba(11, 11, 11, 0.06), 0 8px 24px rgba(11, 11, 11, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #a3a29b;
+    --grid: #2c2c2a;
+    --accent: #2f9e69;
+    --on-accent: #ffffff;
+    --link: #86b6ef;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--link); }
+h1 { font-size: 32px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+.lede { color: var(--ink-2); margin: 0 0 20px; max-width: 640px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.button {
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px;
+  border-radius: 10px; border: 1px solid var(--grid); background: var(--surface);
+  color: var(--ink); text-decoration: none; font-weight: 600;
+}
+.button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.note { color: var(--muted); font-size: 15px; margin: 0 0 8px; max-width: 640px; }
+section { margin-top: 48px; }
+h2 { font-size: 22px; margin: 0 0 4px; }
+section > p { color: var(--ink-2); margin: 0 0 20px; }
+.screens {
+  display: grid; gap: 24px 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+figure { margin: 0; }
+figure a { display: block; border-radius: 22px; box-shadow: var(--shadow); }
+figure img {
+  display: block; width: 100%; height: auto; aspect-ratio: 390 / 844;
+  border-radius: 22px; border: 1px solid var(--grid); background: var(--surface);
+}
+figcaption { margin-top: 10px; font-size: 15px; color: var(--ink-2); }
+figcaption b { display: block; color: var(--ink); font-size: 16px; }
+@media (max-width: 520px) {
+  h1 { font-size: 28px; }
+  .screens { grid-template-columns: 1fr 1fr; gap: 20px 12px; }
+  figure a, figure img { border-radius: 14px; }
+  figcaption { font-size: 14px; }
+  figcaption b { font-size: 15px; }
+}
+footer { margin-top: 56px; color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Photo Quest</h1>
+  <p class="lede">A phone web app for a group outing's photo challenges. Groups send photos for challenges, the committee judges them and enters station game scores, and everyone follows a live scoreboard and gallery. These are its screens, taken from the demo.</p>
+  <div class="actions">
+    <a class="button primary" href="https://photo-scavenger-hunt.samyipsh-work.workers.dev">Try the demo</a>
+    <a class="button" href="https://github.com/samyipsh/photo-scavenger-hunt">Code on GitHub</a>
+    <a class="button" href="build-analytics.html">How it was built</a>
+  </div>
+  <p class="note">The demo's committee passphrase is on its sign-in screen. Photos you send there show only on your phone, and the demo resets every night.</p>
+
+  <section>
+    <h2>For groups</h2>
+    <p>Each group opens its own page and sends photos for challenges between stations.</p>
+    <div class="screens">
+      <figure><a href="screens/home.jpg"><img src="screens/home.jpg" alt="Home: the list of groups" loading="lazy"></a><figcaption><b>Pick your group</b>Every group is listed, so nobody needs a QR code.</figcaption></figure>
+      <figure><a href="screens/group.jpg"><img src="screens/group.jpg" alt="A group's page during round 2" loading="lazy"></a><figcaption><b>Your group's page</b>Where to be now, what's next, and your points.</figcaption></figure>
+      <figure><a href="screens/group-spot-it.jpg"><img src="screens/group-spot-it.jpg" alt="The Spot it challenges" loading="lazy"></a><figcaption><b>Challenges</b>In tabs, each with its points and whether it's done.</figcaption></figure>
+      <figure><a href="screens/challenge.jpg"><img src="screens/challenge.jpg" alt="The Swan challenge sheet" loading="lazy"></a><figcaption><b>One challenge</b>Take a photo or pick one, and see whether it counts.</figcaption></figure>
+      <figure><a href="screens/animals.jpg"><img src="screens/animals.jpg" alt="Naming an animal spotted" loading="lazy"></a><figcaption><b>Animals spotted</b>Name each animal. Every new one counts towards the award.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>For everyone</h2>
+    <p>Anyone with the app link can follow along.</p>
+    <div class="screens">
+      <figure><a href="screens/scoreboard.jpg"><img src="screens/scoreboard.jpg" alt="The live scoreboard" loading="lazy"></a><figcaption><b>Scoreboard</b>Live, with the award races under it.</figcaption></figure>
+      <figure><a href="screens/gallery.jpg"><img src="screens/gallery.jpg" alt="The gallery" loading="lazy"></a><figcaption><b>Gallery</b>Every photo, newest or most liked first.</figcaption></figure>
+      <figure><a href="screens/photo.jpg"><img src="screens/photo.jpg" alt="A photo full screen" loading="lazy"></a><figcaption><b>One photo</b>Full screen. Swipe for the next, tap the heart to like it.</figcaption></figure>
+      <figure><a href="screens/gallery-group.jpg"><img src="screens/gallery-group.jpg" alt="One group's photos by challenge" loading="lazy"></a><figcaption><b>One group's photos</b>Laid out by challenge.</figcaption></figure>
+      <figure><a href="screens/not-counted.jpg"><img src="screens/not-counted.jpg" alt="Photos that don't count" loading="lazy"></a><figcaption><b>Doesn't count</b>Photos a judge turned down, with the reason.</figcaption></figure>
+      <figure><a href="screens/help.jpg"><img src="screens/help.jpg" alt="The Help page" loading="lazy"></a><figcaption><b>Help</b>Who to ask, where to go, and the committee's stations.</figcaption></figure>
+      <figure><a href="screens/guide.jpg"><img src="screens/guide.jpg" alt="The participant guide" loading="lazy"></a><figcaption><b>Participant guide</b>The morning's timeline and how scoring works.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>For the committee</h2>
+    <p>One shared passphrase, no accounts.</p>
+    <div class="screens">
+      <figure><a href="screens/sign-in.jpg"><img src="screens/sign-in.jpg" alt="Committee sign-in" loading="lazy"></a><figcaption><b>Sign in</b>The committee's passphrase, once per phone.</figcaption></figure>
+      <figure><a href="screens/committee.jpg"><img src="screens/committee.jpg" alt="Committee home" loading="lazy"></a><figcaption><b>Committee home</b>What needs doing, and who's at each station.</figcaption></figure>
+      <figure><a href="screens/judge.jpg"><img src="screens/judge.jpg" alt="Judging a photo" loading="lazy"></a><figcaption><b>Judge photos</b>One at a time, or as a grid by challenge.</figcaption></figure>
+      <figure><a href="screens/station.jpg"><img src="screens/station.jpg" alt="Entering a station's scores" loading="lazy"></a><figcaption><b>Station scores</b>In visiting order. Scores wait on the phone when there's no signal.</figcaption></figure>
+      <figure><a href="screens/manage.jpg"><img src="screens/manage.jpg" alt="Every score in one grid" loading="lazy"></a><figcaption><b>Manage</b>Every score in one grid to check against the paper sheets.</figcaption></figure>
+      <figure><a href="screens/hidden.jpg"><img src="screens/hidden.jpg" alt="Hidden photos" loading="lazy"></a><figcaption><b>Hidden photos</b>Out of the gallery. Unhide them, or delete them for good.</figcaption></figure>
+    </div>
+  </section>
+
+  <footer>Screens at 390 by 844, an iPhone's size, captured with <code>scripts/screens.ts</code>. <a href="https://github.com/samyipsh/photo-scavenger-hunt">Source on GitHub</a>, Apache 2.0. Photos by people at the outing, faces under stickers; the bonsai is by Lobster1 on <a href="https://commons.wikimedia.org/wiki/File:Tyersall_Ave,_Bandstand,_Singapore_-_panoramio_(27).jpg">Wikimedia Commons</a>, resized, under its own licence, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>.</footer>
+</main>
+</body>
+</html>

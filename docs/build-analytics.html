@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build analytics</title>
+<meta name="description" content="Where the time, prompts and tokens went while one developer steered AI agents to build a photo app for a church outing.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #6f6d68;
+  --grid: #e1e0d9;
+  --base: #c3c2b7;
+  --ring: rgba(11, 11, 11, 0.10);
+  --band: #f0efec;
+  --s1: #2a78d6;
+  --s1-ctx: #86b6ef;
+  --s2: #eb6834;
+  --s3: #1baf7a;
+  --s4: #eda100;
+  --on-s4: #0b0b0b;
+  --link: #1c5cab;
+  --tip-bg: #0b0b0b;
+  --tip-ink: #f0efec;
+  --tip-ink-2: #c3c2b7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #f0efec;
+    --ink-2: #c3c2b7;
+    --muted: #a3a29b;
+    --grid: #2c2c2a;
+    --base: #383835;
+    --ring: rgba(255, 255, 255, 0.10);
+    --band: #262624;
+    --s1: #3987e5;
+    --s1-ctx: #184f95;
+    --s2: #d95926;
+    --s3: #199e70;
+    --s4: #c98500;
+    --on-s4: #ffffff;
+    --link: #86b6ef;
+    --tip-bg: #f0efec;
+    --tip-ink: #0b0b0b;
+    --tip-ink-2: #52514e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d;
+  --surface: #1a1a19;
+  --ink: #f0efec;
+  --ink-2: #c3c2b7;
+  --muted: #a3a29b;
+  --grid: #2c2c2a;
+  --base: #383835;
+  --ring: rgba(255, 255, 255, 0.10);
+  --band: #262624;
+  --s1: #3987e5;
+  --s1-ctx: #184f95;
+  --s2: #d95926;
+  --s3: #199e70;
+  --s4: #c98500;
+  --on-s4: #ffffff;
+  --link: #86b6ef;
+  --tip-bg: #f0efec;
+  --tip-ink: #0b0b0b;
+  --tip-ink-2: #52514e;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 64px; }
+a { color: var(--link); }
+h1 { font-size: 30px; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 22px; line-height: 1.3; margin: 48px 0 4px; }
+h3 { font-size: 18px; line-height: 1.35; margin: 0 0 4px; }
+p { margin: 0 0 12px; }
+.lede { color: var(--ink-2); font-size: 18px; margin-bottom: 24px; }
+.part-intro { color: var(--ink-2); margin-bottom: 16px; }
+
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 0 0 8px; }
+.tiles .tile:last-child { grid-column: 1 / -1; }
+@media (min-width: 640px) {
+  .tiles { grid-template-columns: repeat(6, 1fr); }
+  .tiles .tile { grid-column: span 2; }
+  .tiles .tile:nth-child(n+4) { grid-column: span 3; }
+}
+.tile { background: var(--surface); box-shadow: 0 0 0 1px var(--ring); border-radius: 12px; padding: 14px 16px; }
+.tile .label { color: var(--ink-2); font-size: 15px; }
+.tile .value { font-size: 28px; font-weight: 600; line-height: 1.25; }
+.tile .note { color: var(--ink-2); font-size: 15px; }
+
+.card { background: var(--surface); box-shadow: 0 0 0 1px var(--ring); border-radius: 12px; padding: 20px 16px 16px; margin: 0 0 16px; position: relative; }
+.card .sub { color: var(--ink-2); margin-bottom: 12px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
+.seg { display: inline-flex; background: var(--band); border-radius: 10px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+.seg button {
+  font: inherit; font-size: 15px; color: var(--ink-2); background: transparent; border: 0; border-radius: 8px;
+  min-height: 44px; padding: 0 12px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--ring); }
+.seg button:focus-visible, .row:focus-visible, .chip:focus-visible, summary:focus-visible { outline: 2px solid var(--s1); outline-offset: 2px; }
+
+.filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 44px; margin: 0 0 16px; color: var(--ink-2); }
+.chip {
+  font: inherit; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+  border-radius: 22px; border: 0; background: var(--surface); color: var(--ink); box-shadow: 0 0 0 1px var(--ring); cursor: pointer;
+}
+.chip[hidden] { display: none; }
+.chip .x { color: var(--ink-2); font-size: 18px; line-height: 1; }
+
+.rows { display: flex; flex-direction: column; gap: 4px; }
+.row {
+  display: block; width: 100%; text-align: left; font: inherit; color: inherit; background: transparent; border: 0;
+  border-radius: 8px; padding: 6px 4px 8px; cursor: pointer;
+}
+.row:hover { background: var(--band); }
+.row .name { display: flex; justify-content: space-between; gap: 12px; font-size: 16px; }
+.row .val { color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.row .track { height: 12px; margin-top: 6px; }
+.row .bar { height: 12px; border-radius: 0 4px 4px 0; background: var(--s1); min-width: 2px; transition: width .25s ease, opacity .2s; }
+.rows.has-pick .row .bar { opacity: 0.3; }
+.rows.has-pick .row[aria-pressed="true"] .bar { opacity: 1; }
+.rows.has-pick .row[aria-pressed="true"] .name { font-weight: 600; }
+
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: inherit; }
+.tick { fill: var(--muted); font-size: 13px; }
+.dlabel { fill: var(--ink); font-size: 14px; font-weight: 600; }
+.dlabel-2 { fill: var(--ink-2); font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 8px 0 0; color: var(--ink-2); font-size: 15px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.legend i.line { height: 2px; width: 16px; border-radius: 1px; }
+
+.headline { font-size: 18px; margin: 0 0 8px; }
+.headline b { font-size: 28px; font-weight: 600; margin-right: 4px; }
+
+.segbar { display: flex; gap: 2px; height: 28px; margin: 4px 0 8px; }
+.segbar div {
+  border-radius: 4px; display: flex; align-items: center; padding: 0 8px; min-width: 2px;
+  color: #ffffff; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: visible; cursor: default;
+}
+.segbar div.dark-ink { color: var(--on-s4); }
+.segbar div span.hide { visibility: hidden; }
+
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--ink-2); min-height: 44px; display: flex; align-items: center; font-size: 15px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; margin-top: 4px; }
+th, td { text-align: left; padding: 8px 8px 8px 0; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.table-wrap { overflow-x: auto; }
+
+.asks { list-style: none; padding: 0; margin: 8px 0 0; }
+.asks li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--grid); }
+.asks li:last-child { border-bottom: 0; }
+.asks .t { color: var(--ink); }
+.asks .m { color: var(--ink-2); font-size: 15px; }
+.asks .c { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+
+.notes { color: var(--ink-2); font-size: 15px; }
+.notes li { margin-bottom: 6px; }
+
+#tip {
+  position: fixed; z-index: 10; pointer-events: none; background: var(--tip-bg); color: var(--tip-ink);
+  border-radius: 8px; padding: 8px 10px; font-size: 14px; line-height: 1.4; max-width: 260px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); opacity: 0; transition: opacity .1s;
+}
+#tip.on { opacity: 1; }
+#tip .tt { color: var(--tip-ink-2); margin-bottom: 2px; }
+#tip .tr { display: flex; align-items: center; gap: 8px; }
+#tip .tr i { width: 12px; height: 2px; border-radius: 1px; display: inline-block; flex: none; }
+#tip .tr b { font-weight: 600; }
+#tip .tr span { color: var(--tip-ink-2); }
+
+.hit { fill: transparent; cursor: default; }
+.hit:focus { outline: none; }
+.hit:focus-visible { stroke: var(--s1); stroke-width: 2; }
+
+@media (max-width: 420px) {
+  h1 { font-size: 26px; }
+  .tile .value { font-size: 24px; }
+}
+@media print {
+  body { background: #fff; }
+  .controls, .filter, #tip { display: none !important; }
+  details { display: block; }
+  details > summary { display: none; }
+  .card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>How it was built, in numbers</h1>
+    <p class="lede">A photo app for one church outing, vibecoded by one developer steering AI agents over six main days, between 3 and 14 Nov 2026. This page has the charts. The story and the lessons are in <a href="how-it-was-built.html">How this was built</a>.</p>
+  </header>
+
+  <section class="tiles" aria-label="Totals">
+    <div class="tile"><div class="label">Days worked</div><div class="value" id="t-days"></div><div class="note" id="t-days-n"></div></div>
+    <div class="tile"><div class="label">Developer time</div><div class="value" id="t-dev"></div><div class="note" id="t-dev-n"></div></div>
+    <div class="tile"><div class="label">Agent time</div><div class="value" id="t-agent"></div><div class="note" id="t-agent-n"></div></div>
+    <div class="tile"><div class="label">Tokens</div><div class="value" id="t-tok"></div><div class="note" id="t-tok-n"></div></div>
+    <div class="tile"><div class="label">At API prices</div><div class="value" id="t-cost"></div><div class="note">Paid through existing subscriptions instead</div></div>
+  </section>
+
+  <h2>The developer's time</h2>
+  <p class="part-intro">Each prompt the developer typed is filed under one category and credited with the time until the next prompt. A gap over 30 minutes counts as 10 minutes, so time away from the chat mostly goes uncounted. Tap a category to filter the charts in this part.</p>
+
+  <div class="card" id="c-cat">
+    <h3 id="cat-title"></h3>
+    <p class="sub" id="cat-sub"></p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Measure">
+        <button type="button" data-m="time" aria-pressed="true">Time</button>
+        <button type="button" data-m="prompts" aria-pressed="false">Prompts</button>
+        <button type="button" data-m="ppr" aria-pressed="false">Per result</button>
+      </div>
+    </div>
+    <div class="rows" id="cat-rows"></div>
+    <details><summary>Show as a table</summary><div class="table-wrap" id="cat-table"></div></details>
+  </div>
+
+  <div class="filter" id="filter">
+    <span>Showing</span>
+    <span id="filter-all">all categories</span>
+    <button type="button" class="chip" id="filter-chip" hidden><span id="filter-name"></span><span class="x" aria-hidden="true">×</span><span class="visually-hidden" style="position:absolute;left:-9999px">Clear filter</span></button>
+  </div>
+
+  <div class="card" id="c-days">
+    <h3 id="days-title"></h3>
+    <p class="sub" id="days-sub"></p>
+    <div class="chart" id="days-chart"></div>
+    <div class="legend" id="days-legend"></div>
+    <details><summary>Show as a table</summary><div class="table-wrap" id="days-table"></div></details>
+  </div>
+
+  <div class="card" id="c-ppr">
+    <h3>Prompts it took to get each result</h3>
+    <p class="sub">A result is one thing the developer wanted, like a feature, a fix or a design change. Every prompt that asked for it, corrected it or asked again counts towards it, and one prompt can count towards several. <span id="ppr-steer"></span></p>
+    <p class="headline" id="ppr-head"></p>
+    <div class="chart" id="ppr-chart"></div>
+    <h3 style="margin-top:20px">Took the most prompts</h3>
+    <ul class="asks" id="ppr-top"></ul>
+    <details><summary>Show every result</summary><div class="table-wrap" id="ppr-table"></div></details>
+  </div>
+
+  <h2>The agents</h2>
+  <p class="part-intro">Claude Opus 5.5 built and reviewed. GPT-6.1 Sol, through the Codex CLI, gave second reviews.</p>
+
+  <div class="card" id="c-agents">
+    <h3 id="agents-title">Agents worked hardest on the climb day</h3>
+    <p class="sub" id="agents-sub"></p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Measure">
+        <button type="button" data-m="agentHours" aria-pressed="true">Agent-hours</button>
+        <button type="button" data-m="agentWall" aria-pressed="false">Wall clock</button>
+        <button type="button" data-m="tokens" aria-pressed="false">Tokens</button>
+      </div>
+    </div>
+    <div class="chart" id="agents-chart"></div>
+    <details><summary>Show as a table</summary><div class="table-wrap" id="agents-table"></div></details>
+  </div>
+
+  <div class="card" id="c-code">
+    <h3>The climb doubled the app code in an afternoon</h3>
+    <p class="sub">Lines of app code at each commit on main, not counting the shadcn-vue components. The shaded band is the unattended UX climb, rounds 27 to 36.</p>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Measure">
+        <button type="button" data-m="lines" aria-pressed="true">Lines of code</button>
+        <button type="button" data-m="undo" aria-pressed="false">Lines with undo</button>
+      </div>
+    </div>
+    <div class="chart" id="code-chart"></div>
+    <details><summary>Show as a table</summary><div class="table-wrap" id="code-table"></div></details>
+  </div>
+
+  <div class="card" id="c-cost">
+    <h3>What it would have cost at API prices</h3>
+    <p class="sub">Every turn re-reads the conversation so far, so about half the bill is cache reads. Output, the code and text the models wrote, is about a fifth.</p>
+    <p class="headline" id="cost-head"></p>
+    <div class="segbar" id="cost-bar" role="img"></div>
+    <div class="legend" id="cost-legend"></div>
+    <details><summary>Show tokens as a table</summary><div class="table-wrap" id="tok-table"></div></details>
+  </div>
+
+  <h2>How these numbers were measured</h2>
+  <ul class="notes">
+    <li>Claude figures come from the Claude Code session logs for this project, covering the main checkout, worktrees, subagents and headless review runs. Each API response is counted once.</li>
+    <li>Codex figures come from Codex's session logs for runs whose working folder was this project.</li>
+    <li>Agent-hours add up every session's active time, so two agents working at once count twice. Wall-clock hours count any time at least one agent was working. A session counts as active until it has been quiet for 5 minutes.</li>
+    <li>Results were grouped from the developer's prompts by a fresh Claude session, then checked by hand. It's a judgement, not a measurement.</li>
+    <li>API prices are list prices on 14 Nov 2026. Claude Opus 5.5 costs US$4 per million input tokens, $20 per million output, $0.20 for cache reads, and $5 or $8 for cache writes to the 5-minute or 1-hour cache. GPT-6.1 Sol costs $2 per million input tokens, $0.10 cached and $10 output.</li>
+    <li id="asof"></li>
+  </ul>
+</main>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="data">{"categories":[{"key":"outing","hours":3.81,"prompts":27},{"key":"arch","hours":1.8,"prompts":12},{"key":"ux","hours":2.92,"prompts":17},{"key":"ops","hours":3.03,"prompts":26},{"key":"ui","hours":4.66,"prompts":30},{"key":"features","hours":4.66,"prompts":31},{"key":"climb","hours":3.07,"prompts":17},{"key":"event","hours":0.81,"prompts":7}],"days":[{"day":"2026-11-03","dev":{"outing":1.72,"arch":0.57,"ux":0.28,"ops":0.47,"ui":0.42,"features":0.17},"prompts":{"outing":11,"arch":3,"ux":2,"ops":3,"ui":1,"features":1},"agentWall":4.83,"agentHours":6.54,"tokens":{"cache":313458279,"other":5144122,"out":1526070,"codex":8301807,"codex_runs":11}},{"day":"2026-11-04","dev":{"ux":0.44,"ui":0.37,"arch":0.54,"ops":0.65,"climb":0.19,"features":0.17},"prompts":{"ux":3,"ui":4,"arch":4,"ops":7,"climb":1,"features":1},"agentWall":7.29,"agentHours":8.63,"tokens":{"cache":535640705,"other":5718562,"out":1784286,"codex":23945656,"codex_runs":18}},{"day":"2026-11-05","dev":{"climb":2.87,"ops":0.17,"outing":0.21,"arch":0.17,"ux":0.55,"features":1.7},"prompts":{"climb":16,"ops":1,"outing":2,"arch":1,"ux":3,"features":12},"agentWall":7.78,"agentHours":14.99,"tokens":{"cache":863874607,"other":10820321,"out":3902642,"codex":30586718,"codex_runs":17}},{"day":"2026-11-06","dev":{"features":0.36},"prompts":{"features":2},"agentWall":1.67,"agentHours":2.12,"tokens":{"cache":43900298,"other":995277,"out":539641,"codex":7203202,"codex_runs":6}},{"day":"2026-11-07","dev":{},"prompts":{},"agentWall":0,"agentHours":0,"tokens":{}},{"day":"2026-11-08","dev":{"outing":0.65,"features":0.46,"ops":0.17},"prompts":{"outing":4,"features":2,"ops":1},"agentWall":1.93,"agentHours":2.22,"tokens":{"cache":90755131,"other":1519518,"out":441179,"codex":1799875,"codex_runs":2}},{"day":"2026-11-09","dev":{},"prompts":{},"agentWall":0,"agentHours":0,"tokens":{}},{"day":"2026-11-10","dev":{"arch":0.17},"prompts":{"arch":1},"agentWall":0.22,"agentHours":0.27,"tokens":{"cache":7708842,"other":246558,"out":60948}},{"day":"2026-11-11","dev":{"arch":0.17,"features":0.17},"prompts":{"arch":1,"features":1},"agentWall":0.45,"agentHours":0.56,"tokens":{"cache":28240710,"other":654430,"out":153779}},{"day":"2026-11-12","dev":{"ops":1.0,"ui":1.58,"features":0.14,"ux":0.57,"outing":0.4,"event":0.1},"prompts":{"ops":10,"ui":11,"features":3,"ux":4,"outing":4,"event":2},"agentWall":3.65,"agentHours":5.16,"tokens":{"cache":281770700,"other":3456998,"out":968771,"codex":4153129,"codex_runs":4}},{"day":"2026-11-13","dev":{"features":0.95,"arch":0.17,"ui":0.69,"ops":0.4,"ux":0.34,"event":0.22,"outing":0.66},"prompts":{"features":3,"arch":1,"ui":4,"ops":2,"ux":2,"event":2,"outing":4},"agentWall":3.17,"agentHours":4.4,"tokens":{"cache":309757551,"other":3403210,"out":832408,"codex":11753004,"codex_runs":13}},{"day":"2026-11-14","dev":{"ui":1.6,"outing":0.18,"event":0.49,"features":0.55,"ux":0.73,"arch":0.03,"ops":0.18},"prompts":{"ui":10,"outing":2,"event":3,"features":6,"ux":3,"arch":1,"ops":2},"agentWall":4.47,"agentHours":8.3,"tokens":{"cache":531335721,"other":6663583,"out":1655998,"codex":11073820,"codex_runs":8}}],"code":[{"sha":"6714f09","t":"2026-11-03T17:23","lines":0,"undo":0},{"sha":"769d385","t":"2026-11-03T17:36","lines":0,"undo":0},{"sha":"4cd68c5","t":"2026-11-03T17:52","lines":0,"undo":0},{"sha":"8190504","t":"2026-11-03T18:02","lines":9,"undo":0},{"sha":"dc053fc","t":"2026-11-03T21:25","lines":9,"undo":0},{"sha":"be338f2","t":"2026-11-03T21:39","lines":1024,"undo":0},{"sha":"cb8d573","t":"2026-11-03T21:57","lines":2196,"undo":6},{"sha":"76dfdac","t":"2026-11-03T22:02","lines":2197,"undo":6},{"sha":"66ce0ec","t":"2026-11-03T22:14","lines":2191,"undo":6},{"sha":"fbcbdd4","t":"2026-11-03T22:31","lines":2258,"undo":5},{"sha":"72d6eb6","t":"2026-11-03T22:45","lines":2289,"undo":9},{"sha":"721fba8","t":"2026-11-03T22:53","lines":2390,"undo":9},{"sha":"a80822e","t":"2026-11-03T22:57","lines":2397,"undo":9},{"sha":"683481d","t":"2026-11-03T23:02","lines":2425,"undo":7},{"sha":"f3c0053","t":"2026-11-03T23:12","lines":2447,"undo":7},{"sha":"619c10a","t":"2026-11-03T23:18","lines":2448,"undo":7},{"sha":"ebb4c28","t":"2026-11-03T23:20","lines":2448,"undo":7},{"sha":"37e408f","t":"2026-11-03T23:22","lines":2460,"undo":7},{"sha":"36e7502","t":"2026-11-03T23:27","lines":2472,"undo":7},{"sha":"123de4f","t":"2026-11-03T23:29","lines":2485,"undo":7},{"sha":"b112ec8","t":"2026-11-03T23:33","lines":2486,"undo":7},{"sha":"080e0bd","t":"2026-11-03T23:37","lines":2481,"undo":7},{"sha":"1237d0d","t":"2026-11-03T23:54","lines":2699,"undo":8},{"sha":"ad52810","t":"2026-11-04T00:10","lines":2844,"undo":8},{"sha":"d7d9fde","t":"2026-11-04T00:20","lines":2872,"undo":9},{"sha":"0179e2b","t":"2026-11-04T00:29","lines":2891,"undo":9},{"sha":"c919b1a","t":"2026-11-04T00:31","lines":2897,"undo":9},{"sha":"798a371","t":"2026-11-04T09:35","lines":3256,"undo":11},{"sha":"0674064","t":"2026-11-04T09:49","lines":3336,"undo":11},{"sha":"67fcd68","t":"2026-11-04T09:55","lines":3343,"undo":11},{"sha":"08f975a","t":"2026-11-04T09:59","lines":3343,"undo":11},{"sha":"09a07b2","t":"2026-11-04T10:48","lines":3762,"undo":11},{"sha":"3e8f1b4","t":"2026-11-04T10:52","lines":3763,"undo":11},{"sha":"364c2b6","t":"2026-11-04T12:23","lines":3835,"undo":11},{"sha":"987854a","t":"2026-11-04T12:50","lines":4010,"undo":11},{"sha":"7f73af0","t":"2026-11-04T21:37","lines":4106,"undo":11},{"sha":"dd69ce4","t":"2026-11-04T21:45","lines":4120,"undo":11},{"sha":"3c0dc0e","t":"2026-11-04T21:57","lines":4089,"undo":11},{"sha":"9a2be7e","t":"2026-11-04T21:58","lines":4089,"undo":11},{"sha":"51cfaf5","t":"2026-11-04T21:59","lines":4089,"undo":11},{"sha":"4612a7d","t":"2026-11-04T22:16","lines":4092,"undo":11},{"sha":"159a140","t":"2026-11-04T22:27","lines":4120,"undo":11},{"sha":"e2d0291","t":"2026-11-04T22:39","lines":4120,"undo":11},{"sha":"8854c72","t":"2026-11-04T22:41","lines":4120,"undo":11},{"sha":"98b8bb7","t":"2026-11-04T22:48","lines":4120,"undo":11},{"sha":"a5a01ac","t":"2026-11-04T23:47","lines":4121,"undo":11},{"sha":"4dfb1ae","t":"2026-11-05T00:02","lines":4153,"undo":11},{"sha":"b606ac8","t":"2026-11-05T00:15","lines":4169,"undo":11},{"sha":"2606889","t":"2026-11-05T00:26","lines":4170,"undo":11},{"sha":"b6b0315","t":"2026-11-05T00:48","lines":4183,"undo":11},{"sha":"3a8412a","t":"2026-11-05T10:53","lines":4474,"undo":11},{"sha":"22bc8a1","t":"2026-11-05T11:20","lines":4474,"undo":11},{"sha":"5799afd","t":"2026-11-05T11:35","lines":4745,"undo":13},{"sha":"95253de","t":"2026-11-05T11:35","lines":4810,"undo":13},{"sha":"296bf2b","t":"2026-11-05T11:35","lines":4968,"undo":13},{"sha":"bcf12c2","t":"2026-11-05T11:53","lines":4989,"undo":13},{"sha":"c1dd227","t":"2026-11-05T12:02","lines":4989,"undo":13},{"sha":"19d94b9","t":"2026-11-05T12:48","lines":5049,"undo":13},{"sha":"6f92718","t":"2026-11-05T13:00","lines":5049,"undo":13},{"sha":"96d14e1","t":"2026-11-05T13:04","lines":5509,"undo":20},{"sha":"e5ac8e9","t":"2026-11-05T13:05","lines":5520,"undo":20},{"sha":"26e03e0","t":"2026-11-05T13:05","lines":5888,"undo":20},{"sha":"b614770","t":"2026-11-05T13:05","lines":5888,"undo":20},{"sha":"1ec08e2","t":"2026-11-05T13:08","lines":6134,"undo":20},{"sha":"1f9d358","t":"2026-11-05T13:09","lines":6133,"undo":20},{"sha":"30ac905","t":"2026-11-05T13:10","lines":6133,"undo":20},{"sha":"b12e56e","t":"2026-11-05T13:27","lines":6133,"undo":20},{"sha":"9ac8f59","t":"2026-11-05T14:01","lines":6131,"undo":20},{"sha":"0dc5ed2","t":"2026-11-05T14:10","lines":6139,"undo":20},{"sha":"e01e455","t":"2026-11-05T14:15","lines":6176,"undo":20},{"sha":"cba8298","t":"2026-11-05T14:15","lines":6176,"undo":20},{"sha":"d4f36fa","t":"2026-11-05T14:31","lines":6512,"undo":20},{"sha":"51f0221","t":"2026-11-05T14:32","lines":6512,"undo":20},{"sha":"e3ddab8","t":"2026-11-05T14:33","lines":6578,"undo":20},{"sha":"722d6a4","t":"2026-11-05T14:38","lines":6929,"undo":24},{"sha":"6318cff","t":"2026-11-05T14:40","lines":6929,"undo":24},{"sha":"4b3cc2b","t":"2026-11-05T14:40","lines":7334,"undo":36},{"sha":"6b99bc2","t":"2026-11-05T14:40","lines":7334,"undo":36},{"sha":"df0b5b2","t":"2026-11-05T14:43","lines":7334,"undo":36},{"sha":"8005aeb","t":"2026-11-05T14:51","lines":7334,"undo":36},{"sha":"8c49b54","t":"2026-11-05T15:00","lines":7337,"undo":36},{"sha":"44312e2","t":"2026-11-05T15:38","lines":7337,"undo":36},{"sha":"1c83e84","t":"2026-11-05T15:45","lines":7337,"undo":36},{"sha":"5af4205","t":"2026-11-05T15:48","lines":7337,"undo":36},{"sha":"287f132","t":"2026-11-05T15:50","lines":7337,"undo":36},{"sha":"632d840","t":"2026-11-05T15:51","lines":7362,"undo":36},{"sha":"c3db51d","t":"2026-11-05T15:53","lines":7341,"undo":36},{"sha":"b857571","t":"2026-11-05T15:54","lines":7374,"undo":36},{"sha":"3a6e41a","t":"2026-11-05T16:01","lines":7370,"undo":36},{"sha":"1ee6b05","t":"2026-11-05T16:05","lines":7502,"undo":55},{"sha":"bb7066e","t":"2026-11-05T16:05","lines":7502,"undo":55},{"sha":"6fb6048","t":"2026-11-05T16:07","lines":7890,"undo":70},{"sha":"e4f1e6c","t":"2026-11-05T16:07","lines":7890,"undo":70},{"sha":"0a5a18a","t":"2026-11-05T16:07","lines":7890,"undo":70},{"sha":"9ad69b4","t":"2026-11-05T16:08","lines":7890,"undo":70},{"sha":"678a394","t":"2026-11-05T16:11","lines":8081,"undo":83},{"sha":"9e2a3be","t":"2026-11-05T16:11","lines":8081,"undo":83},{"sha":"384db14","t":"2026-11-05T16:12","lines":8081,"undo":83},{"sha":"0e18356","t":"2026-11-05T16:12","lines":8395,"undo":103},{"sha":"05a0c06","t":"2026-11-05T16:12","lines":8395,"undo":103},{"sha":"1404b49","t":"2026-11-05T16:13","lines":8395,"undo":103},{"sha":"590f37f","t":"2026-11-05T16:13","lines":8395,"undo":103},{"sha":"ee15135","t":"2026-11-05T16:14","lines":8778,"undo":107},{"sha":"849a14d","t":"2026-11-05T16:15","lines":8779,"undo":107},{"sha":"a6aeebb","t":"2026-11-05T16:15","lines":8779,"undo":107},{"sha":"7ee3032","t":"2026-11-05T16:17","lines":8779,"undo":107},{"sha":"23bfb93","t":"2026-11-05T16:40","lines":8243,"undo":45},{"sha":"ce2f70c","t":"2026-11-05T16:57","lines":8243,"undo":45},{"sha":"1178ec2","t":"2026-11-05T17:26","lines":8243,"undo":45},{"sha":"2e2e256","t":"2026-11-05T17:29","lines":8217,"undo":45},{"sha":"3b015bd","t":"2026-11-05T17:47","lines":8223,"undo":45},{"sha":"3f8f465","t":"2026-11-05T17:52","lines":8226,"undo":45},{"sha":"adfad29","t":"2026-11-05T17:57","lines":8231,"undo":45},{"sha":"aad8227","t":"2026-11-05T17:58","lines":8231,"undo":45},{"sha":"21b221d","t":"2026-11-05T18:06","lines":8245,"undo":45},{"sha":"0b032ed","t":"2026-11-05T18:14","lines":8236,"undo":45},{"sha":"3525a04","t":"2026-11-05T18:15","lines":8249,"undo":45},{"sha":"5ca7fde","t":"2026-11-05T18:16","lines":8246,"undo":45},{"sha":"a4980f4","t":"2026-11-05T18:24","lines":8248,"undo":45},{"sha":"50a3edc","t":"2026-11-05T18:25","lines":8251,"undo":45},{"sha":"5220050","t":"2026-11-05T18:31","lines":8250,"undo":45},{"sha":"068e646","t":"2026-11-05T18:38","lines":8251,"undo":45},{"sha":"51be0b1","t":"2026-11-05T19:17","lines":8255,"undo":45},{"sha":"81e3624","t":"2026-11-05T22:07","lines":8255,"undo":45},{"sha":"9be2d5e","t":"2026-11-05T23:42","lines":8255,"undo":45},{"sha":"0919565","t":"2026-11-06T02:09","lines":9194,"undo":45},{"sha":"350d44a","t":"2026-11-08T14:16","lines":9194,"undo":45},{"sha":"97dcc43","t":"2026-11-08T14:22","lines":9274,"undo":45},{"sha":"daee904","t":"2026-11-08T17:23","lines":9276,"undo":45},{"sha":"5e63f2e","t":"2026-11-08T17:24","lines":9276,"undo":45},{"sha":"ac85599","t":"2026-11-08T17:25","lines":9276,"undo":45},{"sha":"4fa0748","t":"2026-11-12T01:05","lines":9297,"undo":44},{"sha":"f091ad4","t":"2026-11-12T01:05","lines":9287,"undo":44},{"sha":"7c179e6","t":"2026-11-12T01:18","lines":9385,"undo":43},{"sha":"eef90ec","t":"2026-11-12T01:18","lines":9476,"undo":44},{"sha":"8754d65","t":"2026-11-12T01:18","lines":9489,"undo":44},{"sha":"776e36a","t":"2026-11-12T10:34","lines":9489,"undo":44},{"sha":"55753c9","t":"2026-11-12T10:34","lines":9489,"undo":44},{"sha":"aca5dc4","t":"2026-11-12T10:46","lines":9539,"undo":44},{"sha":"7fbc53d","t":"2026-11-12T11:09","lines":9584,"undo":44},{"sha":"d03c853","t":"2026-11-12T13:55","lines":9584,"undo":44},{"sha":"2ecab36","t":"2026-11-12T15:00","lines":9586,"undo":44},{"sha":"2515571","t":"2026-11-12T15:01","lines":9565,"undo":44},{"sha":"4085349","t":"2026-11-12T15:12","lines":9558,"undo":44},{"sha":"9e55762","t":"2026-11-12T15:23","lines":9554,"undo":44},{"sha":"7f45885","t":"2026-11-12T15:44","lines":9556,"undo":44},{"sha":"ccef6cd","t":"2026-11-12T22:04","lines":9542,"undo":44},{"sha":"f35c14b","t":"2026-11-12T22:04","lines":9542,"undo":44},{"sha":"ffb38e4","t":"2026-11-12T22:04","lines":9542,"undo":44},{"sha":"9897417","t":"2026-11-12T22:08","lines":9548,"undo":44},{"sha":"3a090c8","t":"2026-11-12T22:08","lines":9548,"undo":44},{"sha":"7d91719","t":"2026-11-12T22:25","lines":9551,"undo":44},{"sha":"5bc2f2d","t":"2026-11-13T10:56","lines":9591,"undo":44},{"sha":"a50af3c","t":"2026-11-13T10:56","lines":9617,"undo":44},{"sha":"aaade5b","t":"2026-11-13T11:18","lines":9623,"undo":44},{"sha":"325e178","t":"2026-11-13T11:39","lines":9648,"undo":44},{"sha":"5045430","t":"2026-11-13T13:09","lines":9747,"undo":44},{"sha":"60a4c2e","t":"2026-11-14T07:07","lines":9768,"undo":44},{"sha":"91ca71e","t":"2026-11-14T07:23","lines":9768,"undo":44},{"sha":"3017727","t":"2026-11-14T07:34","lines":9769,"undo":44},{"sha":"4a09381","t":"2026-11-14T15:06","lines":9769,"undo":44},{"sha":"51d18eb","t":"2026-11-14T17:50","lines":9769,"undo":44},{"sha":"d738f08","t":"2026-11-14T18:08","lines":9769,"undo":44},{"sha":"48a9998","t":"2026-11-14T18:08","lines":9773,"undo":44},{"sha":"02969e2","t":"2026-11-14T18:09","lines":9796,"undo":44},{"sha":"79ac403","t":"2026-11-14T18:13","lines":10074,"undo":44},{"sha":"73b923b","t":"2026-11-14T18:42","lines":10074,"undo":44},{"sha":"092e540","t":"2026-11-14T18:45","lines":10074,"undo":44}],"asks":[{"title":"Rewrite outing notes for readability","category":"outing","prompts":1,"outcome":"landed"},{"title":"Photo sharing approach and app plan","category":"arch","prompts":5,"outcome":"landed"},{"title":"Curate findable photo challenges","category":"outing","prompts":7,"outcome":"landed"},{"title":"Award races and their point values","category":"outing","prompts":3,"outcome":"landed"},{"title":"Station locations, timetable and duties","category":"outing","prompts":2,"outcome":"landed"},{"title":"Types of Christ hints and explanations","category":"outing","prompts":3,"outcome":"landed"},{"title":"Printable hint cards and answer sheet","category":"outing","prompts":5,"outcome":"landed"},{"title":"Paper score sheets for stations","category":"outing","prompts":3,"outcome":"dropped"},{"title":"Reviewer-approved UX using shadcn-vue","category":"ux","prompts":1,"outcome":"landed"},{"title":"Set the committee passphrase secret","category":"ops","prompts":1,"outcome":"landed"},{"title":"Scoreboard group breakdown panel","category":"ui","prompts":8,"outcome":"landed"},{"title":"Award races card layout","category":"ui","prompts":6,"outcome":"landed"},{"title":"Just a photo as default, clear label","category":"ux","prompts":3,"outcome":"landed"},{"title":"Challenge subtitle wording","category":"outing","prompts":4,"outcome":"landed"},{"title":"Just a photo opens gallery, not camera","category":"features","prompts":1,"outcome":"landed"},{"title":"List all stops, next one highlighted","category":"ux","prompts":4,"outcome":"landed"},{"title":"Station map with styled pins","category":"outing","prompts":1,"outcome":"unclear"},{"title":"Committee members submit for own group","category":"features","prompts":2,"outcome":"dropped"},{"title":"Share a link instead of QR code","category":"ux","prompts":1,"outcome":"landed"},{"title":"Rename All photos back to Gallery","category":"ui","prompts":1,"outcome":"landed"},{"title":"Choose camera or photo library","category":"ux","prompts":4,"outcome":"landed"},{"title":"Icon-only menu button","category":"ui","prompts":2,"outcome":"landed"},{"title":"Pick a challenge after taking photo","category":"ux","prompts":1,"outcome":"landed"},{"title":"Done tick badge corner clash","category":"ui","prompts":1,"outcome":"landed"},{"title":"Dog photo not counted as animal","category":"features","prompts":1,"outcome":"landed"},{"title":"Relabel wrongly tagged test photos","category":"ops","prompts":1,"outcome":"landed"},{"title":"Welcome notice with include-people tip","category":"ux","prompts":7,"outcome":"landed"},{"title":"Committee station score grid","category":"features","prompts":1,"outcome":"landed"},{"title":"Committee briefing checklist","category":"outing","prompts":1,"outcome":"landed"},{"title":"Double-tap photo likes","category":"features","prompts":2,"outcome":"landed"},{"title":"Multi-select and save photos","category":"features","prompts":13,"outcome":"landed"},{"title":"Need help page with contacts","category":"features","prompts":3,"outcome":"landed"},{"title":"Committee switch to close uploads","category":"features","prompts":1,"outcome":"landed"},{"title":"Uploader can delete or move own photo","category":"features","prompts":1,"outcome":"landed"},{"title":"Any animal and any flower in Spot it","category":"ux","prompts":4,"outcome":"landed"},{"title":"Clearer upload and gallery icons","category":"ui","prompts":1,"outcome":"landed"},{"title":"Photos count by default; mismatch is admin-only","category":"ux","prompts":1,"outcome":"landed"},{"title":"Liked photos first in gallery","category":"features","prompts":3,"outcome":"dropped"},{"title":"Animal and flower races atop picker","category":"ui","prompts":2,"outcome":"landed"},{"title":"Most liked photo award","category":"features","prompts":2,"outcome":"landed"},{"title":"Open-source as a fresh public repo","category":"event","prompts":2,"outcome":"unclear"},{"title":"Presigned R2 uploads and view links","category":"arch","prompts":2,"outcome":"landed"},{"title":"Drop the Tell the committee button","category":"ux","prompts":1,"outcome":"landed"},{"title":"Workers paid plan for one month","category":"ops","prompts":1,"outcome":"landed"},{"title":"Fainter like badges in gallery","category":"ui","prompts":2,"outcome":"landed"},{"title":"Architecture review loop to 8/10","category":"arch","prompts":2,"outcome":"landed"},{"title":"UI/UX review hillclimb to 9/10","category":"climb","prompts":1,"outcome":"dropped"},{"title":"Optional Google sign-in","category":"features","prompts":2,"outcome":"dropped"},{"title":"Count real photo points in totals","category":"arch","prompts":1,"outcome":"landed"},{"title":"Photos grouped by challenge grid","category":"features","prompts":3,"outcome":"landed"},{"title":"Committee sets group leader names","category":"features","prompts":1,"outcome":"landed"},{"title":"Clean live data for event day","category":"ops","prompts":3,"outcome":"landed"},{"title":"Realistic demo photos on staging","category":"ops","prompts":1,"outcome":"landed"},{"title":"Participant guide web page","category":"outing","prompts":5,"outcome":"landed"},{"title":"Lock scores instead of hidden reveal","category":"features","prompts":1,"outcome":"landed"},{"title":"Hide future stations as spoilers","category":"ux","prompts":4,"outcome":"dropped"},{"title":"Write a short hillclimb UI skill","category":"climb","prompts":5,"outcome":"landed"},{"title":"Revert hillclimb feature bloat","category":"climb","prompts":2,"outcome":"landed"},{"title":"Gallery filters back to two dropdowns","category":"climb","prompts":1,"outcome":"landed"},{"title":"Trim the UX flows doc","category":"climb","prompts":1,"outcome":"landed"},{"title":"Done challenges stay in place, highlighted","category":"climb","prompts":1,"outcome":"landed"},{"title":"Group page awards panel","category":"ui","prompts":7,"outcome":"landed"},{"title":"Group header photo points layout","category":"ui","prompts":1,"outcome":"landed"},{"title":"Show every photo, no x2 grouping","category":"ux","prompts":1,"outcome":"landed"},{"title":"Android Back closes overlays","category":"features","prompts":1,"outcome":"landed"},{"title":"Gallery paging and shared caching","category":"arch","prompts":2,"outcome":"landed"},{"title":"Caching strategy doc","category":"arch","prompts":1,"outcome":"landed"},{"title":"Check, retake or crop before sending","category":"features","prompts":5,"outcome":"landed"},{"title":"Log device ID and IP","category":"event","prompts":1,"outcome":"landed"},{"title":"Station rows: points position and colour","category":"ui","prompts":1,"outcome":"landed"},{"title":"Reduce from six groups to five","category":"features","prompts":2,"outcome":"landed"},{"title":"Station screen shows expected group times","category":"ux","prompts":1,"outcome":"landed"},{"title":"Tidy the event plan doc","category":"outing","prompts":1,"outcome":"landed"},{"title":"Codenames station scoring rules","category":"outing","prompts":2,"outcome":"landed"},{"title":"Photo opens behind challenge sheet","category":"features","prompts":1,"outcome":"landed"},{"title":"Remove the cancelled ice cream stop","category":"outing","prompts":1,"outcome":"landed"},{"title":"Event-day log watching and phone blocking","category":"event","prompts":3,"outcome":"landed"},{"title":"Race standing in Spot it rows","category":"ui","prompts":6,"outcome":"landed"},{"title":"Photo time with day, set in Controls","category":"features","prompts":2,"outcome":"landed"},{"title":"Camera button style on counted challenges","category":"ui","prompts":1,"outcome":"landed"},{"title":"Title-row select alignment","category":"ui","prompts":3,"outcome":"dropped"},{"title":"Keep last data when signal drops","category":"features","prompts":1,"outcome":"landed"},{"title":"Blocked phones can't open the app","category":"event","prompts":2,"outcome":"dropped"},{"title":"Menu close button spacing","category":"ui","prompts":1,"outcome":"landed"},{"title":"Short link for the live app","category":"ops","prompts":1,"outcome":"landed"},{"title":"Post-event review with analytics","category":"event","prompts":2,"outcome":"landed"},{"title":"Speed up the scoreboard","category":"features","prompts":3,"outcome":"landed"},{"title":"Log why uploads are refused","category":"event","prompts":1,"outcome":"landed"},{"title":"Control when uploads open","category":"features","prompts":2,"outcome":"dropped"},{"title":"Participant guide inside the app","category":"features","prompts":3,"outcome":"landed"},{"title":"Station scoring explainer on scoreboard","category":"ux","prompts":5,"outcome":"dropped"},{"title":"Tint award rows a group holds","category":"ui","prompts":2,"outcome":"landed"},{"title":"Move Change group into Help","category":"ux","prompts":3,"outcome":"landed"},{"title":"Enjoy-the-moment line in welcome notice","category":"ux","prompts":2,"outcome":"landed"},{"title":"Types of Christ explainer PDF","category":"outing","prompts":1,"outcome":"unclear"},{"title":"Write-up of how the app was built","category":"event","prompts":1,"outcome":"unclear"}],"climb":{"start":"2026-11-04T22:33","end":"2026-11-05T16:40"},"totals":{"devLoose":30,"agentWall":35.5,"agentHours":53.2,"claudeTokens":3056930845,"claudeCache":3006442544,"codexTokens":99408625,"costTotal":1150,"asOf":"14 Nov 2026","steer":37},"cost":{"parts":[{"label":"Claude cache reads","usd":601},{"label":"Claude cache writes","usd":277},{"label":"Claude output","usd":237},{"label":"Codex, all of it","usd":35}],"tokens":[{"model":"Claude Opus 5.5 and Haiku 5.5","cache":3006442544,"other":38622579,"out":11865722,"usd":1115},{"model":"GPT-6.1 Sol in Codex","cache":90023424,"other":8473866,"out":911335,"usd":35}]}}</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("data").textContent);
+  var NS = "http://www.w3.org/2000/svg";
+  var CAT_LABEL = {
+    ui: "UI polish",
+    features: "Features and fixes",
+    outing: "Planning the outing",
+    climb: "Failed UX climb and cleanup",
+    ops: "Setup, deploys and ops",
+    ux: "UX research and design",
+    arch: "Spec and architecture",
+    event: "Event day, post-event, open-sourcing"
+  };
+  var CAT_COVERS = {
+    ui: "Alignment, icons, design variants, cutting text",
+    features: "Gallery select and save, the photo check screen with crop, Android Back, six groups to five, bugs",
+    outing: "Challenges, stations, quiz hints, printouts, the participant guide. Not app work",
+    climb: "The unattended UX climb and undoing what it added",
+    ops: "Cloudflare account, R2, secrets, billing, deploys, merges",
+    ux: "Research into UX conventions and flows for each screen. For example the How it works card, what Cancel should do, what to hide",
+    arch: "The stack, photos going straight to R2, caching, limits",
+    event: "Watching logs, the post-event review, the write-up"
+  };
+  var state = { cat: null, catMetric: "time", agentMetric: "agentHours", codeMetric: "lines" };
+
+  // ---------- helpers ----------
+  function $(id) { return document.getElementById(id); }
+  function h(tag, attrs, parent, text) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function s(tag, attrs, parent, text) {
+    var e = document.createElementNS(NS, tag);
+    if (attrs) for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function fmtH(x) { return (Math.round(x * 10) / 10).toFixed(1) + " h"; }
+  function fmtInt(x) { return Math.round(x).toLocaleString("en-US"); }
+  function compact(x) {
+    if (x >= 1e9) return (x / 1e9).toFixed(x >= 1e10 ? 0 : 2).replace(/\.?0+$/, "") + "B";
+    if (x >= 1e6) return (x / 1e6).toFixed(x >= 1e8 ? 0 : 1).replace(/\.0$/, "") + "M";
+    if (x >= 1e3) return (x / 1e3).toFixed(x >= 1e4 ? 0 : 1).replace(/\.0$/, "") + "K";
+    return String(Math.round(x));
+  }
+  function pct(x) { return Math.round(x * 100) + "%"; }
+  function inSentence(label) { return /^[A-Z][a-z]/.test(label) ? label.charAt(0).toLowerCase() + label.slice(1) : label; }
+  var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  function dayName(iso) { var d = new Date(iso + "T12:00:00"); return DOW[d.getDay()] + " " + d.getDate() + " Nov"; }
+  function niceMax(v, steps) {
+    if (v <= 0) return 1;
+    var raw = v / steps, mag = Math.pow(10, Math.floor(Math.log10(raw))), n = raw / mag;
+    var step = (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+    return { max: Math.ceil(v / step) * step, step: step };
+  }
+  function seg(container, key, onPick) {
+    var btns = container.querySelectorAll("button");
+    btns.forEach(function (b) {
+      b.addEventListener("click", function () {
+        btns.forEach(function (o) { o.setAttribute("aria-pressed", String(o === b)); });
+        onPick(b.getAttribute("data-m"));
+      });
+    });
+  }
+  function table(parent, head, rows, numCols) {
+    parent.replaceChildren();
+    var t = h("table", null, parent), tr = h("tr", null, h("thead", null, t));
+    head.forEach(function (c, i) { h("th", numCols.indexOf(i) >= 0 ? { "class": "n" } : null, tr, c); });
+    var tb = h("tbody", null, t);
+    rows.forEach(function (r) {
+      var row = h("tr", null, tb);
+      r.forEach(function (c, i) { h("td", numCols.indexOf(i) >= 0 ? { "class": "n" } : null, row, c); });
+    });
+  }
+
+  // ---------- tooltip ----------
+  var tip = $("tip");
+  function showTip(x, y, title, rows) {
+    tip.replaceChildren();
+    if (title) h("div", { "class": "tt" }, tip, title);
+    rows.forEach(function (r) {
+      var line = h("div", { "class": "tr" }, tip);
+      if (r.color) { var i = h("i", null, line); i.style.background = r.color; }
+      h("b", null, line, r.value);
+      if (r.label) h("span", null, line, r.label);
+    });
+    tip.classList.add("on");
+    var w = tip.offsetWidth, ht = tip.offsetHeight, vw = window.innerWidth;
+    var left = Math.min(Math.max(8, x - w / 2), vw - w - 8);
+    var top = y - ht - 14;
+    if (top < 8) top = y + 18;
+    tip.style.left = left + "px";
+    tip.style.top = top + "px";
+  }
+  function hideTip() { tip.classList.remove("on"); }
+  function bindTip(el, fn) {
+    el.addEventListener("pointermove", function (e) { var t = fn(); showTip(e.clientX, e.clientY, t[0], t[1]); });
+    el.addEventListener("pointerleave", hideTip);
+    el.addEventListener("focus", function () { var r = el.getBoundingClientRect(), t = fn(); showTip(r.left + r.width / 2, r.top, t[0], t[1]); });
+    el.addEventListener("blur", hideTip);
+  }
+  window.addEventListener("scroll", hideTip, { passive: true });
+
+  // ---------- derived data ----------
+  var cats = D.categories.slice().sort(function (a, b) { return b.hours - a.hours || b.prompts - a.prompts; });
+  var totalH = cats.reduce(function (a, c) { return a + c.hours; }, 0);
+  var totalP = cats.reduce(function (a, c) { return a + c.prompts; }, 0);
+  var asks = D.asks || [];
+  function asksFor(cat) { return asks.filter(function (a) { return !cat || a.category === cat; }); }
+  function meanPpr(list) { return list.length ? list.reduce(function (a, x) { return a + x.prompts; }, 0) / list.length : 0; }
+
+  // tiles
+  var dayHours = D.days.map(function (d) { var t = 0; for (var c in d.dev) t += d.dev[c]; return t; });
+  var mainDays = dayHours.filter(function (x) { return x >= 2; }).length;
+  var lightDays = dayHours.filter(function (x) { return x > 0 && x < 2; }).length;
+  $("t-days").textContent = mainDays + " days";
+  $("t-days-n").textContent = "plus " + lightDays + " light ones, out of 12";
+  $("t-dev").textContent = Math.round(totalH) + " to " + D.totals.devLoose + " h";
+  $("t-dev-n").textContent = "3 to 4 eight-hour days, " + totalP + " prompts";
+  $("t-agent").textContent = Math.round(D.totals.agentWall) + " h";
+  $("t-agent-n").textContent = Math.round(D.totals.agentHours) + " agent-hours in all";
+  $("t-tok").textContent = compact(D.totals.claudeTokens + D.totals.codexTokens);
+  $("t-tok-n").textContent = pct(D.totals.claudeCache / D.totals.claudeTokens) + " of Claude's were cache reads";
+  $("t-cost").textContent = "US$" + fmtInt(Math.round(D.totals.costTotal / 10) * 10);
+  $("ppr-steer").textContent = D.totals.steer + " of the " + totalP + " prompts only approved something or asked a question, so they count towards none.";
+  $("asof").textContent ="Figures as of " + D.totals.asOf + ", the day of the outing. How it was built has the work after it.";
+
+  // ---------- chart 1: categories ----------
+  function renderCats() {
+    var m = state.catMetric, rows = $("cat-rows");
+    rows.replaceChildren();
+    rows.classList.toggle("has-pick", !!state.cat);
+    var vals = cats.map(function (c) {
+      if (m === "time") return c.hours / totalH;
+      if (m === "prompts") return c.prompts / totalP;
+      return meanPpr(asksFor(c.key));
+    });
+    var max = Math.max.apply(null, vals);
+    var screens = ["ui", "ux", "climb"].reduce(function (a, k) { return a + cats.filter(function (c) { return c.key === k; })[0].hours; }, 0);
+    if (m === "time") {
+      $("cat-title").textContent = "Screens took " + pct(screens / totalH) + " of the developer's time";
+      $("cat-sub").textContent = "Share of " + fmtH(totalH).replace(" h", " hours") + ", counting UI polish, UX research and design and the failed climb as screens.";
+    } else if (m === "prompts") {
+      $("cat-title").textContent = "Share of the " + totalP + " prompts typed";
+      $("cat-sub").textContent = "Prompts that mixed several asks are filed under the main one.";
+    } else {
+      var all = meanPpr(asks);
+      $("cat-title").textContent = "Prompts per result, " + all.toFixed(1) + " on average";
+      $("cat-sub").textContent = "Mean prompts it took to get each result in the category.";
+    }
+    cats.forEach(function (c, i) {
+      var b = h("button", { type: "button", "class": "row", "aria-pressed": String(state.cat === c.key) }, rows);
+      var name = h("div", { "class": "name" }, b);
+      h("span", null, name, CAT_LABEL[c.key]);
+      var v = m === "time" ? pct(vals[i]) + " · " + fmtH(c.hours)
+        : m === "prompts" ? pct(vals[i]) + " · " + c.prompts + " prompts"
+        : vals[i].toFixed(1) + " · " + asksFor(c.key).length + " results";
+      h("span", { "class": "val" }, name, v);
+      var bar = h("div", { "class": "bar" }, h("div", { "class": "track" }, b));
+      bar.style.width = (max ? vals[i] / max * 100 : 0) + "%";
+      b.addEventListener("click", function () { setCat(state.cat === c.key ? null : c.key); });
+    });
+    table($("cat-table"), ["Category", "Hours", "Share", "Prompts", "Results", "Prompts per result", "Covers"],
+      cats.map(function (c) {
+        var a = asksFor(c.key);
+        return [CAT_LABEL[c.key], c.hours.toFixed(1), pct(c.hours / totalH), String(c.prompts), String(a.length), meanPpr(a).toFixed(1), CAT_COVERS[c.key]];
+      }).concat([["Total", totalH.toFixed(1), "100%", String(totalP), String(asks.length), meanPpr(asks).toFixed(1), ""]]), [1, 2, 3, 4, 5]);
+  }
+  seg(document.querySelector("#c-cat .seg"), "catMetric", function (m) { state.catMetric = m; renderCats(); });
+
+  function setCat(k) {
+    state.cat = k;
+    $("filter-chip").hidden = !k;
+    $("filter-all").hidden = !!k;
+    $("filter-name").textContent = k ? CAT_LABEL[k] : "";
+    renderCats(); renderDays(); renderPpr();
+  }
+  $("filter-chip").addEventListener("click", function () { setCat(null); });
+
+  // ---------- generic column chart ----------
+  // series: [{values:[...], color}], stacked bottom-up with 2px gaps
+  function columns(container, opt) {
+    container.replaceChildren();
+    var W = Math.max(300, container.clientWidth), H = opt.height || 220;
+    var m = { l: 40, r: 8, t: 26, b: 30 };
+    var pw = W - m.l - m.r, ph = H - m.t - m.b, n = opt.labels.length;
+    var totals = opt.labels.map(function (_, i) { return opt.series.reduce(function (a, se) { return a + se.values[i]; }, 0); });
+    var nm = niceMax(Math.max.apply(null, totals), 4);
+    var y = function (v) { return m.t + ph - v / nm.max * ph; };
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": opt.aria }, container);
+    for (var v = 0; v <= nm.max + 1e-9; v += nm.step) {
+      s("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === 0 ? "var(--base)" : "var(--grid)", "stroke-width": 1, "shape-rendering": "crispEdges" }, svg);
+      s("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", "class": "tick" }, svg, opt.tick(v));
+    }
+    var band = pw / n, bw = Math.min(24, band * 0.62);
+    var peak = totals.indexOf(Math.max.apply(null, totals));
+    opt.labels.forEach(function (lab, i) {
+      var cx = m.l + band * i + band / 2, x = cx - bw / 2, base = 0;
+      var topIdx = -1;
+      opt.series.forEach(function (se, j) { if (se.values[i] > 0) topIdx = j; });
+      opt.series.forEach(function (se, j) {
+        var val = se.values[i];
+        if (val <= 0) return;
+        var y0 = y(base), y1 = y(base + val), hgt = y0 - y1 - (base > 0 ? 2 : 0);
+        var top = y1;
+        if (hgt > 0.5) {
+          var r = j === topIdx ? Math.min(4, hgt, bw / 2) : 0;
+          var yb = top + hgt;
+          s("path", { d: "M" + x + "," + yb + "V" + (top + r) + "Q" + x + "," + top + " " + (x + r) + "," + top + "H" + (x + bw - r) + "Q" + (x + bw) + "," + top + " " + (x + bw) + "," + (top + r) + "V" + yb + "Z", fill: se.color }, svg);
+        }
+        base += val;
+      });
+      s("text", { x: cx, y: H - m.b + 18, "text-anchor": "middle", "class": "tick" }, svg, opt.short(lab, i));
+      if (!opt.noPeak && i === peak && totals[i] > 0) s("text", { x: cx, y: y(totals[i]) - 8, "text-anchor": "middle", "class": "dlabel" }, svg, opt.peakLabel(totals[i]));
+      var hit = s("rect", { x: m.l + band * i, y: m.t, width: band, height: ph, "class": "hit", tabindex: 0, "aria-label": opt.ariaFor(i) }, svg);
+      bindTip(hit, function () { return opt.tipFor(i); });
+    });
+  }
+
+  // ---------- chart 2: developer hours by day ----------
+  function renderDays() {
+    var k = state.cat, days = D.days;
+    var tot = days.map(function (d) { var t = 0; for (var c in d.dev) t += d.dev[c]; return t; });
+    var sel = days.map(function (d) { return k ? (d.dev[k] || 0) : 0; });
+    var rest = tot.map(function (t, i) { return k ? t - sel[i] : t; });
+    var series = k ? [{ values: sel, color: "var(--s1)" }, { values: rest, color: "var(--s1-ctx)" }] : [{ values: tot, color: "var(--s1)" }];
+    var selSum = sel.reduce(function (a, b) { return a + b; }, 0);
+    if (k) {
+      var best = sel.indexOf(Math.max.apply(null, sel));
+      $("days-title").textContent = CAT_LABEL[k] + ": " + fmtH(selSum) + ", most of it on " + dayName(days[best].day);
+      $("days-sub").textContent = "The developer's hours each day, with " + inSentence(CAT_LABEL[k]) + " highlighted.";
+    } else {
+      $("days-title").textContent = mainDays + " main days and " + lightDays + " light ones";
+      $("days-sub").textContent = "The developer's hours each day. A main day had at least 2 hours, spread from morning to night. The busiest was 5 Nov, when the UX climb went wrong and was cleaned up.";
+    }
+    columns($("days-chart"), {
+      labels: days.map(function (d) { return d.day; }),
+      series: series,
+      height: 220,
+      noPeak: !!k,
+      aria: "Column chart of the developer's hours each day",
+      tick: function (v) { return v + " h"; },
+      short: function (iso) { return String(Number(iso.slice(8))); },
+      peakLabel: function (v) { return fmtH(v); },
+      ariaFor: function (i) { return dayName(days[i].day) + ", " + fmtH(tot[i]) + (k ? ", " + fmtH(sel[i]) + " " + CAT_LABEL[k] : ""); },
+      tipFor: function (i) {
+        var rows = [{ value: fmtH(tot[i]), label: "all work", color: k ? "var(--s1-ctx)" : "var(--s1)" }];
+        if (k) rows.unshift({ value: fmtH(sel[i]), label: CAT_LABEL[k], color: "var(--s1)" });
+        return [dayName(days[i].day), rows];
+      }
+    });
+    var lg = $("days-legend");
+    lg.replaceChildren();
+    if (k) {
+      [[CAT_LABEL[k], "var(--s1)"], ["Everything else", "var(--s1-ctx)"]].forEach(function (p) {
+        var sp = h("span", null, lg); h("i", null, sp).style.background = p[1]; sp.appendChild(document.createTextNode(p[0]));
+      });
+    }
+    var cats2 = cats.map(function (c) { return c.key; });
+    table($("days-table"), ["Day", "Hours"].concat(cats2.map(function (c) { return CAT_LABEL[c]; })),
+      days.map(function (d, i) { return [dayName(d.day), tot[i].toFixed(1)].concat(cats2.map(function (c) { return (d.dev[c] || 0).toFixed(1); })); }),
+      [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  }
+
+  // ---------- chart 3: prompts per result ----------
+  function renderPpr() {
+    var list = asksFor(state.cat), bins = [0, 0, 0, 0, 0];
+    list.forEach(function (a) { bins[Math.min(a.prompts, 5) - 1]++; });
+    var head = $("ppr-head");
+    head.replaceChildren();
+    if (!list.length) { head.textContent = "No results in this category."; }
+    else {
+      h("b", null, head, pct(bins[0] / list.length));
+      head.appendChild(document.createTextNode("of " + list.length + " results" + (state.cat ? " in " + inSentence(CAT_LABEL[state.cat]) : "") + " took one prompt. The mean is " + meanPpr(list).toFixed(1) + "."));
+    }
+    var labels = ["1", "2", "3", "4", "5+"];
+    columns($("ppr-chart"), {
+      labels: labels,
+      series: [{ values: bins, color: "var(--s1)" }],
+      height: 200,
+      aria: "Column chart of results by the number of prompts they took",
+      tick: function (v) { return String(v); },
+      short: function (l) { return l + (l === "1" ? " prompt" : ""); },
+      peakLabel: function (v) { return v + " results"; },
+      ariaFor: function (i) { return bins[i] + " results took " + labels[i] + " prompts"; },
+      tipFor: function (i) { return [labels[i] + (labels[i] === "1" ? " prompt" : " prompts"), [{ value: String(bins[i]), label: "results", color: "var(--s1)" }]]; }
+    });
+    var top = list.slice().sort(function (a, b) { return b.prompts - a.prompts; }).slice(0, 5);
+    var ul = $("ppr-top");
+    ul.replaceChildren();
+    top.forEach(function (a) {
+      var li = h("li", null, ul), left = h("div", null, li);
+      h("div", { "class": "t" }, left, a.title);
+      h("div", { "class": "m" }, left, CAT_LABEL[a.category] + (a.outcome === "dropped" ? " · dropped" : ""));
+      h("div", { "class": "c" }, li, a.prompts + " prompts");
+    });
+    table($("ppr-table"), ["Result", "Category", "Prompts", "Outcome"],
+      list.slice().sort(function (a, b) { return b.prompts - a.prompts || a.title.localeCompare(b.title); })
+        .map(function (a) { return [a.title, CAT_LABEL[a.category], String(a.prompts), a.outcome]; }), [2]);
+  }
+
+  // ---------- chart 4: agents by day ----------
+  function renderAgents() {
+    var mm = state.agentMetric, days = D.days;
+    var vals = days.map(function (d) {
+      if (mm === "tokens") return (d.tokens.cache || 0) + (d.tokens.other || 0) + (d.tokens.out || 0);
+      return d[mm];
+    });
+    var sum = vals.reduce(function (a, b) { return a + b; }, 0);
+    $("agents-sub").textContent = mm === "tokens" ? compact(sum) + " Claude tokens in all, nearly all of it cache reads."
+      : mm === "agentWall" ? Math.round(sum) + " hours with at least one agent working."
+      : Math.round(sum) + " agent-hours, counting agents that ran side by side.";
+    columns($("agents-chart"), {
+      labels: days.map(function (d) { return d.day; }),
+      series: [{ values: vals, color: "var(--s1)" }],
+      height: 220,
+      aria: "Column chart of agent activity each day",
+      tick: function (v) { return mm === "tokens" ? compact(v) : v + " h"; },
+      short: function (iso) { return String(Number(iso.slice(8))); },
+      peakLabel: function (v) { return mm === "tokens" ? compact(v) : fmtH(v); },
+      ariaFor: function (i) { return dayName(days[i].day) + ", " + (mm === "tokens" ? compact(vals[i]) + " tokens" : fmtH(vals[i])); },
+      tipFor: function (i) {
+        var d = days[i];
+        if (mm === "tokens") return [dayName(d.day), [
+          { value: compact(d.tokens.cache || 0), label: "input from cache", color: "var(--s1)" },
+          { value: compact(d.tokens.other || 0), label: "input not from cache", color: "var(--s1)" },
+          { value: compact(d.tokens.out || 0), label: "output", color: "var(--s1)" }]];
+        return [dayName(d.day), [{ value: fmtH(vals[i]), label: mm === "agentWall" ? "wall-clock" : "agent-hours", color: "var(--s1)" }]];
+      }
+    });
+    table($("agents-table"), ["Day", "Agent-hours", "Wall-clock hours", "Claude tokens", "Codex tokens"],
+      days.map(function (d) {
+        return [dayName(d.day), d.agentHours.toFixed(1), d.agentWall.toFixed(1),
+          compact((d.tokens.cache || 0) + (d.tokens.other || 0) + (d.tokens.out || 0)), compact(d.tokens.codex || 0)];
+      }), [1, 2, 3, 4]);
+  }
+  seg(document.querySelector("#c-agents .seg"), "agentMetric", function (m) { state.agentMetric = m; renderAgents(); });
+
+  // ---------- chart 5: app code over time ----------
+  function tParse(t) { return new Date(t + ":00+08:00").getTime(); }
+  function fmtWhen(ms) {
+    var d = new Date(ms + 8 * 3600e3);
+    var hh = d.getUTCHours(), mi = d.getUTCMinutes(), ap = hh < 12 ? "am" : "pm", h12 = hh % 12 || 12;
+    return DOW[d.getUTCDay()] + " " + d.getUTCDate() + " Nov, " + h12 + ":" + String(mi).padStart(2, "0") + " " + ap;
+  }
+  function renderCode() {
+    var c = $("code-chart"), key = state.codeMetric;
+    c.replaceChildren();
+    var pts = D.code.map(function (p) { return { t: tParse(p.t), v: p[key], p: p }; });
+    var W = Math.max(300, c.clientWidth), H = 240, m = { l: 44, r: 12, t: 28, b: 30 };
+    var pw = W - m.l - m.r, ph = H - m.t - m.b;
+    var t0 = tParse("2026-11-03T00:00"), t1 = tParse("2026-11-15T00:00");
+    var x = function (t) { return m.l + (t - t0) / (t1 - t0) * pw; };
+    var vmax = Math.max.apply(null, pts.map(function (p) { return p.v; }));
+    var nm = niceMax(vmax, 4);
+    var y = function (v) { return m.t + ph - v / nm.max * ph; };
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": key === "lines" ? "Line chart of lines of app code from 3 to 14 Nov" : "Line chart of lines mentioning undo from 3 to 14 Nov" }, c);
+    var cs = tParse(D.climb.start), ce = tParse(D.climb.end);
+    s("rect", { x: x(cs), y: m.t, width: Math.max(2, x(ce) - x(cs)), height: ph, fill: "var(--band)" }, svg);
+    s("text", { x: x(cs), y: m.t - 10, "class": "dlabel-2" }, svg, "UX climb");
+    for (var v = 0; v <= nm.max + 1e-9; v += nm.step) {
+      s("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === 0 ? "var(--base)" : "var(--grid)", "stroke-width": 1, "shape-rendering": "crispEdges" }, svg);
+      s("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", "class": "tick" }, svg, nm.max >= 10000 ? compact(v) : fmtInt(v));
+    }
+    var perDay = pw / 12;
+    for (var d = 3; d <= 14; d++) {
+      var tx = x(tParse("2026-11-" + String(d).padStart(2, "0") + "T12:00"));
+      if (perDay >= 22 || d % 2 === 1) s("text", { x: tx, y: H - m.b + 18, "text-anchor": "middle", "class": "tick" }, svg, String(d));
+    }
+    var dpath = "";
+    pts.forEach(function (p, i) {
+      dpath += (i === 0 ? "M" + x(p.t) + "," + y(p.v) : "H" + x(p.t) + "V" + y(p.v));
+    });
+    dpath += "H" + x(pts[pts.length - 1].t);
+    s("path", { d: dpath, fill: "none", stroke: "var(--s1)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+    var peakI = 0, endI = pts.length - 1;
+    pts.forEach(function (p, i) { if (p.t <= ce + 3600e3 && p.v > pts[peakI].v) peakI = i; });
+    var lab = function (v) { return key === "lines" ? fmtInt(v) + " lines" : fmtInt(v) + " lines"; };
+    s("text", { x: Math.min(x(pts[peakI].t) + 8, W - m.r - 90), y: y(pts[peakI].v) - 14, "class": "dlabel" }, svg, lab(pts[peakI].v));
+    s("text", { x: W - m.r, y: y(pts[endI].v) - 10, "text-anchor": "end", "class": "dlabel-2" }, svg, "now " + fmtInt(pts[endI].v));
+    var cross = s("line", { y1: m.t, y2: m.t + ph, stroke: "var(--base)", "stroke-width": 1, visibility: "hidden" }, svg);
+    var dot = s("circle", { r: 4, fill: "var(--s1)", stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" }, svg);
+    var hit = s("rect", { x: m.l, y: m.t, width: pw, height: ph, "class": "hit", tabindex: 0, "aria-label": "Move across to read each commit" }, svg);
+    var cur = endI;
+    function at(i, cx, cy) {
+      cur = i;
+      var p = pts[i], px = x(p.t), py = y(p.v);
+      cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
+      dot.setAttribute("cx", px); dot.setAttribute("cy", py); dot.setAttribute("visibility", "visible");
+      showTip(cx, cy, fmtWhen(p.t), [
+        { value: fmtInt(p.p.lines), label: "lines of app code", color: key === "lines" ? "var(--s1)" : null },
+        { value: fmtInt(p.p.undo), label: "lines mentioning undo", color: key === "undo" ? "var(--s1)" : null }]);
+    }
+    function nearest(clientX) {
+      var r = svg.getBoundingClientRect(), sx = (clientX - r.left) / r.width * W;
+      var best = 0, bd = Infinity;
+      pts.forEach(function (p, i) { var dd = Math.abs(x(p.t) - sx); if (dd < bd) { bd = dd; best = i; } });
+      return best;
+    }
+    hit.addEventListener("pointermove", function (e) {
+      var i = nearest(e.clientX), r = svg.getBoundingClientRect();
+      at(i, r.left + x(pts[i].t) / W * r.width, r.top + y(pts[i].v) / H * r.height);
+    });
+    function clear() { cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); hideTip(); }
+    hit.addEventListener("pointerleave", clear);
+    hit.addEventListener("blur", clear);
+    hit.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      e.preventDefault();
+      var i = Math.max(0, Math.min(pts.length - 1, cur + (e.key === "ArrowRight" ? 1 : -1)));
+      var r = svg.getBoundingClientRect();
+      at(i, r.left + x(pts[i].t) / W * r.width, r.top + y(pts[i].v) / H * r.height);
+    });
+    var legend = [];
+    table($("code-table"), ["Commit time", "Commit", "Lines of app code", "Lines mentioning undo"],
+      D.code.map(function (p) { return [fmtWhen(tParse(p.t)), p.sha, fmtInt(p.lines), fmtInt(p.undo)]; }), [2, 3]);
+  }
+  seg(document.querySelector("#c-code .seg"), "codeMetric", function (m) { state.codeMetric = m; renderCode(); });
+
+  // ---------- chart 6: cost ----------
+  function renderCost() {
+    var parts = D.cost.parts, total = parts.reduce(function (a, p) { return a + p.usd; }, 0);
+    var colors = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)"];
+    var head = $("cost-head");
+    head.replaceChildren();
+    h("b", null, head, "US$" + fmtInt(Math.round(total / 10) * 10));
+    head.appendChild(document.createTextNode("at list prices, for " + compact(D.totals.claudeTokens + D.totals.codexTokens) + " tokens."));
+    var bar = $("cost-bar"), lg = $("cost-legend");
+    bar.replaceChildren(); lg.replaceChildren();
+    bar.setAttribute("aria-label", parts.map(function (p) { return p.label + " US$" + fmtInt(p.usd); }).join(", "));
+    parts.forEach(function (p, i) {
+      var d = h("div", { tabindex: 0, "aria-label": p.label + ", US$" + fmtInt(p.usd) + ", " + pct(p.usd / total) }, bar);
+      d.style.flex = p.usd + " 1 0";
+      d.style.background = colors[i];
+      if (i === 3) d.classList.add("dark-ink");
+      var sp = h("span", null, d, pct(p.usd / total));
+      bindTip(d, function () { return [p.label, [{ value: "US$" + fmtInt(p.usd), label: pct(p.usd / total), color: colors[i] }]]; });
+      var lsp = h("span", null, lg); h("i", null, lsp).style.background = colors[i]; lsp.appendChild(document.createTextNode(p.label + " US$" + fmtInt(p.usd)));
+    });
+    requestAnimationFrame(function () {
+      bar.querySelectorAll("div").forEach(function (d) {
+        var sp = d.querySelector("span");
+        sp.classList.toggle("hide", sp.offsetWidth + 16 > d.clientWidth);
+      });
+    });
+    table($("tok-table"), ["Model", "Input from cache", "Input not from cache", "Output", "At API prices"],
+      D.cost.tokens.map(function (r) { return [r.model, compact(r.cache), compact(r.other), compact(r.out), "US$" + fmtInt(r.usd)]; }), [1, 2, 3, 4]);
+  }
+
+  function renderAll() { renderCats(); renderDays(); renderPpr(); renderAgents(); renderCode(); renderCost(); }
+  renderAll();
+  var lastW = window.innerWidth, timer;
+  window.addEventListener("resize", function () {
+    if (window.innerWidth === lastW) return;
+    lastW = window.innerWidth;
+    clearTimeout(timer);
+    timer = setTimeout(function () { renderDays(); renderPpr(); renderAgents(); renderCode(); renderCost(); }, 120);
+  });
+})();
+</script>
+</body>
+</html>

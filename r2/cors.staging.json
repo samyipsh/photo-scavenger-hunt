@@ -1,0 +1,12 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": ["https://photo-quest-staging.<your-subdomain>.workers.dev"],
+        "methods": ["PUT", "GET"],
+        "headers": ["content-type", "cache-control", "pragma"]
+      },
+      "maxAgeSeconds": 86400
+    }
+  ]
+}

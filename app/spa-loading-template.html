@@ -1,0 +1,10 @@
+<!-- Shown while the app's code loads (the app has no server rendering), so a slow first visit
+     on mobile data sees the top bar and placeholders instead of a white page. The placeholders
+     say it's loading; screen readers hear it from the label. Plain HTML: it
+     can't read data/event.ts, so the name here repeats EVENT.appName. -->
+<div role="status" aria-label="Loading" style="max-width:32rem;margin:0 auto;padding:max(0.5rem,env(safe-area-inset-top)) 16px 0;font-family:ui-sans-serif,system-ui,sans-serif;color:#0a0a0a">
+  <div style="min-height:44px;display:flex;align-items:center;font-size:16px;font-weight:700">Photo Quest</div>
+  <div style="margin-top:12px;height:36px;width:65%;border-radius:8px;background:#ececec"></div>
+  <div style="margin-top:8px;height:24px;width:45%;border-radius:8px;background:#f0f0f0"></div>
+  <div style="margin-top:20px;height:180px;border-radius:16px;background:#f3f3f3"></div>
+</div>

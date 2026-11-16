@@ -1,0 +1,18 @@
+{
+  // The Node scripts and unit tests, which the Nuxt typecheck doesn't cover.
+  "compilerOptions": {
+    "target": "es2023",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "paths": {
+      "#shared/*": ["./shared/*"]
+    }
+  },
+  "include": ["scripts/**/*.ts", "tests/**/*.ts", "data/**/*.ts"],
+  "exclude": ["tests/e2e"]
+}
