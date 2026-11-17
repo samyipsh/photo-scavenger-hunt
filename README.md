@@ -21,6 +21,17 @@ It's about 17,300 lines of TypeScript and Vue: 11,500 for the screens, 2,200 for
 
 Nuxt 4 single-page app on one Cloudflare Worker, with D1 for data and R2 for photos. Photos go from phones straight to R2 with signed links. `docs/tech-stack.md` lists what each part uses, and `docs/architecture.md` explains how it works, with diagrams.
 
+## Did Cloudflare get in the agents' way?
+
+Before building, the owner expected a platform like Cloudflare to hide behaviour from agents and make the app harder to build and maintain with them. That partly held. The code wasn't harder to write: Cloudflare sits in a few files, about 400 lines, and the agents changed the rest like any Nuxt and SQL app. The surprises came from what an agent couldn't run or see from a terminal:
+
+- **Where the database lives.** Ours ended up in Tokyo. By midday on the day, the scoreboard took up to 2.4 s to load, and nothing local could have shown it.
+- **Limits found by hitting them.** D1 takes at most 100 values in a query, so committee actions go 50 photos at a time. A cold Worker used 30 to 60 ms of CPU against the free plan's 10 ms limit. It only stayed up because of leeway Cloudflare doesn't document.
+- **The real storage code never ran in CI.** The app reaches R2 two ways, through the Worker's binding and through R2's S3 API. The usual fix, an S3 server like MinIO in CI, only covers the second. Wrangler can emulate both, but only on a built app and through an experimental setting, and we never wired it in.
+- **Config and keys outside the code.** Nitro generates the deploy config, every Wrangler command defaults to production, and bucket rules were set by hand. The S3 keys came from the dashboard, not the terminal.
+
+The project's costliest mistakes weren't Cloudflare's: an unattended review loop, one giant thread, and two migrations with the same number. For anything longer-lived, the owner would pick a Node server, Postgres and an S3-compatible bucket that runs locally, so CI can test all of it.
+
 ## Photo sizes
 
 The phone shrinks each photo before sending it: an album copy at most 2,048 px on its long side, and a 400 px thumbnail, both JPEG. It saves the album copy at quality 0.85, then tries 0.72 and 0.6 if it's still over 3 MB. The server refuses an album copy over 3 MB or a thumbnail over 400 KB. `app/utils/image.ts` and `shared/utils/photos.ts` hold the numbers.
