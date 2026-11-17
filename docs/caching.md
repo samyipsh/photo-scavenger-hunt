@@ -32,7 +32,7 @@ flowchart LR
 | What | Size | Kept where, for how long | Asked for |
 | --- | --- | --- | --- |
 | A thumbnail (400 px) | 25–55 KB | Each phone's browser, 2 days (`private, max-age=172800, immutable`) | When it scrolls near the screen |
-| An album copy (2048 px) | up to 3 MB | Each phone's browser, 2 days | When the photo is opened or saved |
+| An album copy (2048 px) | up to 3 MB, 1.0 MB on average at the outing | Each phone's browser, 2 days | When the photo is opened or saved |
 | The gallery list (`/api/gallery`) | about 1.3 KB a photo as JSON, 100–170 bytes compressed | The page, plus the browser's cache with an ETag (`private, no-cache`) | On opening the gallery, then every 30 s while it's on screen |
 | This phone's likes and photos (`/api/gallery/mine`) | tens of bytes | The page | On opening the gallery, and when new photos arrive (in demo mode, every 30 s, as it holds the visitor's photos) |
 | The Types of Christ answers (`/api/types`), once shown | about 32 KB as JSON, 10 KB compressed | The page, plus the browser's cache with an ETag (`private, no-cache`); a refusal while hidden is `no-store` | On opening the page |

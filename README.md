@@ -21,6 +21,12 @@ It's about 17,300 lines of TypeScript and Vue: 11,500 for the screens, 2,200 for
 
 Nuxt 4 single-page app on one Cloudflare Worker, with D1 for data and R2 for photos. Photos go from phones straight to R2 with signed links. `docs/tech-stack.md` lists what each part uses, and `docs/architecture.md` explains how it works, with diagrams.
 
+## Photo sizes
+
+The phone shrinks each photo before sending it: an album copy at most 2,048 px on its long side, and a 400 px thumbnail, both JPEG. It saves the album copy at quality 0.85, then tries 0.72 and 0.6 if it's still over 3 MB. The server refuses an album copy over 3 MB or a thumbnail over 400 KB. `app/utils/image.ts` and `shared/utils/photos.ts` hold the numbers.
+
+At the outing, the 280 album copies averaged 1.0 MB. Half were under 980 KB, nine in ten under 1.7 MB, and the largest was 2.2 MB. Thumbnails measured 25 to 55 KB on staging. A photo straight from a phone camera is usually 3 to 6 MB as a JPEG ([SamMobile](https://www.sammobile.com/news/can-i-make-photos-use-less-storage-on-my-samsung-phone/), [TechRadar](https://www.techradar.com/phones/i-tested-the-best-iphone-and-galaxy-cameras-and-more-heres-why-200mp-is-overkill-and-which-setting-id-recommend-instead)), so the average album copy is a third to a sixth the size of a typical camera photo. iPhones store HEIC, which is smaller, but hand the browser a JPEG.
+
 ## Independent reviews
 
 Claude Opus 5.5 and GPT-6.1 Sol (through Codex) each scored the repo twice, in fresh read-only sessions, against one frozen brief. Every score had to cite a file and line or a log line. **The same two model families wrote this code and reviewed its pull requests**, so read the scores with that in mind. After round 1 we fixed six things and asked again.
@@ -37,7 +43,7 @@ Claude Opus 5.5 and GPT-6.1 Sol (through Codex) each scored the repo twice, in f
 | Docs and honesty | 7, 6 | 8, 7 | 7, 7 | 8, 8 |
 | Cleared of AI slop | 5, 5 | 7, 7 | 5, 5 | 8, 8 |
 
-They disagree most on scope and slop. Claude finds crop and rotate, bulk saving and three kinds of draft more than one morning needed, and the screens too big. Codex finds most of that size serves real phone behaviour. `docs/reviews/` has the brief, the evidence, all eight reviews, what changed between rounds, one finding that was wrong, and what we left as is.
+They disagree most on scope and slop. Claude finds crop and rotate, bulk saving and three kinds of draft more than one morning needed, and the screens too big. Codex finds most of that size serves real phone behaviour. `docs/reviews/` has the brief, the evidence, all eight reviews, what changed between rounds, one finding that was wrong, and what we left as is. To run the same review on your own repo, have an agent follow `.claude/skills/repo-review/SKILL.md`.
 
 ## Run it locally
 

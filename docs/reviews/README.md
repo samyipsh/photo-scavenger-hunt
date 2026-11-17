@@ -15,8 +15,9 @@ Each ran twice per round, and both runs are shown, not averaged.
 - **The evidence** each round had: the output of the full check suite on that exact copy, and what was used on the day (`evidence-round-1/`, `evidence-round-2/`; the briefs call this folder `evidence/`).
 - **Round 1:** commit 51642cb, 16 Nov 2026. The first two Codex runs got stuck waiting for input (a mistake in how they were started) and wrote nothing; the reruns, with the same brief, are the ones here.
 - **Round 2:** commit 9416f8d, the same day, after the six fixes below. Port 3000 was taken, so its check log runs the same steps as `pnpm check:all` by hand on port 3003.
-- Both commits were in this repo while it was private. The public history starts from one commit that holds round 2's code, the two fixes after it, and this folder.
+- Both commits were in this repo while it was private. The public history starts from one commit that holds round 2's code, the fixes listed below, and this folder.
 - The raw reviews in `round-1/` and `round-2/` are unedited, except that local file paths are replaced with `<local path>`.
+- `.claude/skills/repo-review` is this method as a skill, with a blank brief, for running it again here or on another repo.
 
 ## Scores
 

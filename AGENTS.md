@@ -29,7 +29,7 @@ Nuxt 4 single-page app (`ssr: false`) on one Cloudflare Worker, D1 (SQLite, thro
 | `app/composables/useBackClose.ts` | Android's Back closes an overlay instead of leaving the page (the browser's CloseWatcher) |
 | `scripts/` | `check-all.ts` (what CI runs), `api-check.ts`, `seed.ts`, `demo-data.ts`, `photos.ts` (recce photos or drawn stand-ins), `upload-photo.ts`, `demo-snapshot.ts` (demo mode's seeded state), `staging-config.ts`, `staging-data.ts` (look at and clear staging's photos and files), `watch-live.ts` (a summary of live requests each minute), `screens.ts` (the pictures on `docs/screens.html`) |
 | `docs/` | `architecture.md` (how it works, with diagrams), `caching.md` (what's kept where, and how it scales), `app-plan.md` (decisions and limits), `ux/flows.md` (every screen), `tech-stack.md` (what each part uses), `how-it-was-built.md` (time, tokens and mistakes), `reviews/` (the independent reviews, both rounds) |
-| `.claude/skills/` | How work is run here, reusable elsewhere: `send-off` (ask at the start of any task that ends in a PR), `hillclimb` and `hillclimb-ui`, `council` (independent reviews), `mobile-ux`, `app-environments`, `pdsa-retro`, and `reuse-this-app` (copying the app for another event) |
+| `.claude/skills/` | How work is run here, reusable elsewhere: `send-off` (ask at the start of any task that ends in a PR), `hillclimb` and `hillclimb-ui`, `council` (independent reviews), `repo-review` (scoring a whole repo, as in `docs/reviews/`), `mobile-ux`, `app-environments`, `pdsa-retro`, and `reuse-this-app` (copying the app for another event) |
 
 ## Checks before calling work done
 
