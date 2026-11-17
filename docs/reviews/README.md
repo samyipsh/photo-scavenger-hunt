@@ -17,7 +17,7 @@ Each ran twice per round, and both runs are shown, not averaged.
 - **Round 2:** commit 9416f8d, the same day, after the six fixes below. Port 3000 was taken, so its check log runs the same steps as `pnpm check:all` by hand on port 3003.
 - Both commits were in this repo while it was private. The public history starts from one commit that holds round 2's code, the fixes listed below, and this folder.
 - The raw reviews in `round-1/` and `round-2/` are unedited, except that local file paths are replaced with `<local path>`.
-- `.claude/skills/repo-review` is this method as a skill, with a blank brief, for running it again here or on another repo.
+- `.claude/skills/repo-review` is a skill for running a review like this one, here or on another repo.
 
 ## Scores
 

@@ -54,7 +54,7 @@ Claude Opus 5.5 and GPT-6.1 Sol (through Codex) each scored the repo twice, in f
 | Docs and honesty | 7, 6 | 8, 7 | 7, 7 | 8, 8 |
 | Cleared of AI slop | 5, 5 | 7, 7 | 5, 5 | 8, 8 |
 
-They disagree most on scope and slop. Claude finds crop and rotate, bulk saving and three kinds of draft more than one morning needed, and the screens too big. Codex finds most of that size serves real phone behaviour. `docs/reviews/` has the brief, the evidence, all eight reviews, what changed between rounds, one finding that was wrong, and what we left as is. To run the same review on your own repo, have an agent follow `.claude/skills/repo-review/SKILL.md`.
+They disagree most on scope and slop. Claude finds crop and rotate, bulk saving and three kinds of draft more than one morning needed, and the screens too big. Codex finds most of that size serves real phone behaviour. `docs/reviews/` has the brief, the evidence, all eight reviews, what changed between rounds, one finding that was wrong, and what we left as is. To run a review like this on your own repo, have an agent follow `.claude/skills/repo-review/SKILL.md`.
 
 ## Run it locally
 
